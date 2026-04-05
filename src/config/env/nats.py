@@ -11,3 +11,7 @@ class NatsSettings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
+    @property
+    def url(self) -> str:
+        return f"nats://{self.user}:{self.password}@{self.host}:{self.port}"
