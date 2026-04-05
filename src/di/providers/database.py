@@ -33,6 +33,5 @@ class DatabaseProvider(Provider):
     async def provide_uow(
         self,
         session: AsyncSession,
-    ) -> AsyncGenerator[UnitOfWork, None]:
-        async with UnitOfWork(session) as uow:
-            yield uow
+    ) -> UnitOfWork:
+        return UnitOfWork(session)
