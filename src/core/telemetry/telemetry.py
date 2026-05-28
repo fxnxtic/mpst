@@ -50,7 +50,11 @@ def shutdown_telemetry() -> None:
 class Telemetry:
     @property
     def logger(self) -> logging.Logger:
-        return get_logger(__name__)
+        ctx = get_trace_context()
+        if all(ctx.values()):
+            return get_logger(__name__, **ctx)
+        else:
+            return get_logger(__name__)
 
     @property
     def tracer(self) -> trace.Tracer:
