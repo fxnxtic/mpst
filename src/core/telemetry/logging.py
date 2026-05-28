@@ -9,6 +9,27 @@ __all__ = (
 )
 
 
+class TraceContextProcessor:
+    """
+    Structlog processor that adds trace_id and span_id from the current span.
+    """
+
+    def __call__(self, logger: logging.Logger, method: str, event: dict) -> dict:
+        from opentelemetry import trace
+
+        span = trace.get_current_span()
+        ctx = span.get_span_context()
+
+        if ctx.is_valid:
+            event["trace_id"] = format(ctx.trace_id, "032x")
+            event["span_id"] = format(ctx.span_id, "016x")
+
+        return event
+
+
+_trace_context_processor = TraceContextProcessor()
+
+
 def get_logger(name: str, **kwargs) -> logging.Logger:
     return structlog.getLogger(name, **kwargs)
 
@@ -49,10 +70,19 @@ def configure_logging(
     else:
         renderer = structlog.dev.ConsoleRenderer(colors=True)
 
+    shared_processors = [
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        _trace_context_processor,
+        structlog.processors.format_exc_info,
+    ]
+
     structlog.configure(
         processors=[
-            structlog.processors.format_exc_info,
-            renderer,
+            *shared_processors,
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),
         wrapper_class=structlog.stdlib.BoundLogger,
@@ -65,11 +95,7 @@ def configure_logging(
     handler.setFormatter(
         structlog.stdlib.ProcessorFormatter(
             processor=renderer,
-            foreign_pre_chain=[
-                structlog.stdlib.add_logger_name,
-                structlog.stdlib.add_log_level,
-                structlog.processors.TimeStamper(fmt="iso"),
-            ],
+            foreign_pre_chain=shared_processors,
         )
     )
 
