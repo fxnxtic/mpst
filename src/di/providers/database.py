@@ -12,7 +12,7 @@ __all__ = ("DatabaseProvider",)
 
 class DatabaseProvider(Provider):
     @provide(scope=Scope.APP)
-    async def provide_engine() -> AsyncEngine:
+    async def provide_engine(self) -> AsyncEngine:
         return await get_engine(cfg.database.url, cfg.database.echo)
 
     @provide(scope=Scope.APP)
@@ -27,7 +27,8 @@ class DatabaseProvider(Provider):
         self,
         sessionmaker: async_sessionmaker[AsyncSession],
     ) -> AsyncGenerator[AsyncSession, None]:
-        return get_session(sessionmaker)
+        async for session in get_session(sessionmaker):
+            yield session
 
     @provide(scope=Scope.REQUEST)
     async def provide_uow(
