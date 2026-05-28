@@ -1,5 +1,4 @@
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.faststream import FastStreamInstrumentator
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
@@ -14,8 +13,6 @@ def configure_instrumentation(settings: Settings) -> None:
         http_capture_headers_server_request=["x-request-id", "x-correlation-id"],
         http_capture_headers_server_response=["x-request-id"],
     )
-
-    FastStreamInstrumentator().instrument()
 
     SQLAlchemyInstrumentor().instrument(
         enable_commenter=True,
