@@ -2,11 +2,18 @@ import traceback
 from contextlib import suppress
 
 import uvicorn
+from dishka.integrations.fastapi import setup_dishka as setup_fastapi_dishka
 from fastapi import FastAPI
 
 from src.api import router
 from src.config import cfg
-from src.core.telemetry import get_logger, setup_telemetry, shutdown_telemetry
+from src.core.telemetry import (
+    FastAPITraceMiddleware,
+    get_logger,
+    setup_telemetry,
+    shutdown_telemetry,
+)
+from src.di import PROVIDERS, create_container
 from src.lifespan import lifespan
 
 logger = get_logger(__name__)
@@ -21,11 +28,17 @@ def run(name: str, host: str, port: int) -> None:
             lifespan=lifespan,
         )
         app.include_router(router)
+        app.add_middleware(FastAPITraceMiddleware)
+
+        logger.debug("Setup DI container...")
+        app.state.container = create_container(PROVIDERS)
+        setup_fastapi_dishka(app.state.container, app=app)
 
         uvicorn.run(
             app=app,
             host=host,
             port=port,
+            log_config=None,
         )
     except Exception:
         logger.critical(traceback.format_exc())
