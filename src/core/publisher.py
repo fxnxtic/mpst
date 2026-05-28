@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 from uuid import UUID, uuid4
 
 from faststream.nats import NatsBroker
@@ -9,6 +9,9 @@ from opentelemetry import trace
 from pydantic import BaseModel, Field
 
 from src.core.telemetry import get_logger
+
+if TYPE_CHECKING:
+    pass
 
 __all__ = (
     "DomainEvent",
@@ -53,7 +56,7 @@ class MessagePublisher:
     Per-request/message publisher with a collect→flush lifecycle.
     """
 
-    def __init__(self, broker: NatsBroker) -> None:  # NatsBroker
+    def __init__(self, broker: NatsBroker) -> None:
         self._broker = broker
         self._pending: list[DomainEvent] = []
 
@@ -155,11 +158,14 @@ class MessagePublisher:
         """
         self._annotate_span(event)
 
+        headers = {"Nats-Msg-Id": event.nats_msg_id()}
+        self._inject_trace_context(headers)
+
         try:
             await self._broker.publish(
                 event.model_dump(mode="json"),
                 subject=event.subject,
-                headers={"Nats-Msg-Id": event.nats_msg_id()},
+                headers=headers,
             )
             logger.info(
                 "event published",
@@ -180,6 +186,19 @@ class MessagePublisher:
                 ),
             )
             raise
+
+    @staticmethod
+    def _inject_trace_context(headers: dict[str, str]) -> None:
+        """
+        Inject current trace context into message headers for propagation.
+        Uses W3C Trace Context propagation format.
+        """
+        from opentelemetry.trace.propagation.tracecontext import (
+            TraceContextTextMapPropagator,
+        )
+
+        propagator = TraceContextTextMapPropagator()
+        propagator.inject(headers)
 
     @staticmethod
     def _annotate_span(event: DomainEvent) -> None:
