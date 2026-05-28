@@ -17,8 +17,8 @@ __all__ = (
 _meter_provider: MeterProvider | None = None
 
 
-def get_meter(name: str) -> metrics.Meter:
-    return metrics.get_meter(name)
+def get_meter(name: str | None = None) -> metrics.Meter:
+    return metrics.get_meter(name or str(__file__))
 
 
 def configure_metrics(settings: Settings) -> None:
@@ -40,3 +40,6 @@ def configure_metrics(settings: Settings) -> None:
     )
 
     metrics.set_meter_provider(_meter_provider)
+
+
+USERS_COUNTER = get_meter().create_counter("users-counter")
