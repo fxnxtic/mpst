@@ -12,8 +12,8 @@ __all__ = (
 )
 
 PROVIDERS = [
-    BrokerProvider,
-    DatabaseProvider,
-    TelemetryProvider,
-    MessagePublisherProvider,
+    BrokerProvider(),
+    DatabaseProvider(),
+    TelemetryProvider(),
+    MessagePublisherProvider(),
 ]
