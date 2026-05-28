@@ -3,10 +3,13 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from src.database.dao.mixins import BaseFilters
+
 __all__ = (
     "UserSchema",
     "UserCS",
     "UserUS",
+    "UserFilters",
 )
 
 
@@ -25,3 +28,8 @@ class UserCS(BaseModel):
 
 
 class UserUS(BaseModel): ...
+
+
+class UserFilters(BaseFilters):
+    id_: list[UUID] | None = None
+    deleted: bool | None = None
