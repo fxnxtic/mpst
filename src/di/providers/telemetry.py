@@ -6,6 +6,6 @@ __all__ = ("TelemetryProvider",)
 
 
 class TelemetryProvider(Provider):
-    @provide(scope=Scope.APP)
+    @provide(scope=Scope.REQUEST)
     def provide_telemetry(self) -> Telemetry:
         return Telemetry()
