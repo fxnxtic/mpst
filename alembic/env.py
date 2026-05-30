@@ -6,24 +6,27 @@ import re
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
 
+import src.services
 from alembic import context
-from src.config import cfg, paths
+from src.config import cfg
 from src.database.models import ModelBase
 
-modules = pkgutil.walk_packages(
-    path=[str(paths.MODULES_DIR)],
-    prefix="src.modules.",
-)
-
-for module in modules:
+for module in pkgutil.walk_packages(
+    src.services.__path__,
+    prefix="src.services.",
+):
     __import__(module.name)
 
 config = context.config
 
-if not config.get_main_option("sqlalchemy.url"):
-    config.set_main_option("sqlalchemy.url", cfg.database.url)
+config.set_main_option("sqlalchemy.url", cfg.database.url)
 
 target_metadata = ModelBase.metadata
+
+
+print("Registered tables:")
+for table in ModelBase.metadata.tables:
+    print("-", table)
 
 
 def process_revision_directives(context, revision, directives):
