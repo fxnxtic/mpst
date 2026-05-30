@@ -16,7 +16,7 @@ class AppSettings(BaseSettings):
 
 class LoggingSettings(BaseSettings):
     level: str = Field(default="INFO", validation_alias="LOGGING__LEVEL")
-    json_output: bool = Field(default=False, validation_alias="LOGGING_JSON_OUTPUT")
+    json_output: bool = Field(default=False, validation_alias="LOGGING__JSON_OUTPUT")
     muted_loggers: list[str] = Field(default_factory=list)
 
     class Config:
