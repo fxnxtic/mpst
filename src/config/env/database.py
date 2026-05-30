@@ -1,8 +1,10 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DatabaseSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
     host: str = Field(default="localhost", validation_alias="DATABASE__HOST")
     port: int = Field(default=5932, validation_alias="DATABASE__PORT")
     user: str = Field(default="guest", validation_alias="DATABASE__USER")
@@ -16,7 +18,3 @@ class DatabaseSettings(BaseSettings):
     @property
     def url(self) -> str:
         return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"

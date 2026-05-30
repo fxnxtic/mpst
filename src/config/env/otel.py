@@ -1,8 +1,10 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class OtelSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
     enabled: bool = Field(default=False, validation_alias="OTEL__ENABLED")
     collector_url: str = Field(
         default="http://localhost:4318", validation_alias="OTEL__COLLECTOR_URL"
@@ -20,7 +22,3 @@ class OtelSettings(BaseSettings):
     @property
     def insecure(self) -> bool:
         return not self.collector_url.startswith("https")
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"

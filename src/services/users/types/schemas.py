@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.database.dao.mixins import BaseFilters
 
@@ -14,13 +14,12 @@ __all__ = (
 
 
 class UserSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id_: UUID
     deleted: bool
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class UserCS(BaseModel):
