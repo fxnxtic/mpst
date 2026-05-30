@@ -76,7 +76,7 @@ Providers are split by concern: `database.py`, `broker.py`, `publisher.py`, `tel
 ### Router manages UoW, not Service
 
 ```python
-async with uow:
+async with uow and publisher:
     user = await service.create(data)
     await uow.commit()
     await publisher.flush()
