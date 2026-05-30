@@ -1,9 +1,10 @@
 from pathlib import Path
 
-from alembic import command
 from alembic.config import Config
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine
+
+from alembic import command
 
 __all__ = (
     "setup_alembic",
