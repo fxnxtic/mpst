@@ -5,7 +5,6 @@
 
 <div align="center">
 <img alt="GitHub License" src="https://img.shields.io/github/license/fxnxtic/mpst">
-<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/fxnxtic/mpst?style=for-the-badge&labelColor=262422&color=F59937">
 <img alt="uv" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fastral-sh%2Fuv%2Fmain%2Fassets%2Fbadge%2Fv0.json&style=flat-square&labelColor=232226&color=6341AC&link=https%3A%2F%2Fastral.sh%2Fuv">
 <img alt="Ruff" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fastral-sh%2Fruff%2Fmain%2Fassets%2Fbadge%2Fv2.json&style=flat-square&labelColor=232226&color=6341AC&link=https%3A%2F%2Fastral.sh%2Fruff">
 <img alt="PyPI - Python Version" src="https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Ffxnxtic%2Fmpst%2Fmaster%2Fpyproject.toml">
