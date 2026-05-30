@@ -1,6 +1,7 @@
 from .broker import BrokerProvider
 from .database import DatabaseProvider
 from .publisher import MessagePublisherProvider
+from .services import SERVICE_PROVIDERS
 from .telemetry import TelemetryProvider
 
 __all__ = (
@@ -16,4 +17,5 @@ PROVIDERS = [
     DatabaseProvider(),
     TelemetryProvider(),
     MessagePublisherProvider(),
+    *SERVICE_PROVIDERS,
 ]
