@@ -9,5 +9,7 @@ from .types.schemas import UserCS, UserUS
 
 
 class UserDAO(BaseDAO[UserModel, UUID, UserCS, UserUS]):
+    model = UserModel
+
     def __init__(self, session: AsyncSession):
         super().__init__(session)

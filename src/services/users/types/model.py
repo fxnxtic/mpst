@@ -3,4 +3,4 @@ from src.database.models.mixins import SoftDeleteMixin, TimestampMixin, UUIDMixi
 
 
 class UserModel(ModelBase, SoftDeleteMixin, TimestampMixin, UUIDMixin):
-    __tablename__ = "user"
+    __tablename__ = "users"

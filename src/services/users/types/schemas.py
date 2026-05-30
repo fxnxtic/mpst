@@ -24,7 +24,7 @@ class UserSchema(BaseModel):
 
 
 class UserCS(BaseModel):
-    id_: UUID
+    id_: UUID | None = None
 
 
 class UserUS(BaseModel): ...
