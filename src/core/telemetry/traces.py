@@ -51,7 +51,7 @@ def configure_traces(settings: Settings) -> None:
         return
 
     exporter = OTLPSpanExporter(
-        endpoint=settings.otel.endpoint,
+        endpoint=settings.otel.endpoint + "/v1/traces",
     )
 
     _tracer_provider = TracerProvider(

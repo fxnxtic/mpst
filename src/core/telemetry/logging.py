@@ -2,6 +2,13 @@ import logging
 import sys
 
 import structlog
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+
+from src.config.env import Settings
+
+from .resource import build_resource
 
 __all__ = (
     "configure_logging",
@@ -30,6 +37,16 @@ class TraceContextProcessor:
 _trace_context_processor = TraceContextProcessor()
 
 
+def configure_logs_export(settings: Settings) -> LoggerProvider:
+    _logs_provider = LoggerProvider(resource=build_resource(settings))
+
+    _logs_provider.add_log_record_processor(
+        BatchLogRecordProcessor(OTLPLogExporter(endpoint=f"{settings.otel.endpoint}/v1/logs"))
+    )
+
+    return _logs_provider
+
+
 def get_logger(name: str, **kwargs) -> logging.Logger:
     return structlog.getLogger(name, **kwargs)
 
@@ -43,29 +60,23 @@ class MuteDropper(logging.Filter):
         return record.name not in self.names_to_mute
 
 
-def configure_logging(
-    level: str = "INFO",
-    json_output: bool = True,
-    muted: list[str] | None = None,
-) -> None:
-    if level not in logging._nameToLevel.keys():
+def configure_logging(settings: Settings) -> None:
+    if settings.logging.level not in logging._nameToLevel.keys():
         raise ValueError(
             "Invalid logging level '%s'. Must be one of %s",
-            str(level),
+            str(settings.logging.level),
             ", ".join(logging._nameToLevel.keys()),
         )
-
-    muted_loggers = [] if muted is None else muted
 
     logging.captureWarnings(True)
 
     logging.basicConfig(
-        level=logging._nameToLevel[level],
+        level=logging._nameToLevel[settings.logging.level],
         stream=sys.stdout,
         format="%(message)s",
     )
 
-    if json_output:
+    if settings.logging.json_output:
         renderer = structlog.processors.JSONRenderer()
     else:
         renderer = structlog.dev.ConsoleRenderer(colors=True)
@@ -89,16 +100,30 @@ def configure_logging(
         cache_logger_on_first_use=True,
     )
 
-    handler = logging.StreamHandler(sys.stdout)
-    handler.addFilter(MuteDropper(muted_loggers))
+    base_handler = logging.StreamHandler(sys.stdout)
 
-    handler.setFormatter(
+    base_handler.setFormatter(
         structlog.stdlib.ProcessorFormatter(
             processor=renderer,
             foreign_pre_chain=shared_processors,
         )
     )
 
+    logs_provider = configure_logs_export(settings=settings)
+
+    otel_handler = LoggingHandler(
+        level=logging._nameToLevel[settings.logging.level],
+        logger_provider=logs_provider,
+    )
+    otel_handler.setFormatter(
+        structlog.stdlib.ProcessorFormatter(
+            processor=structlog.processors.JSONRenderer(),
+            foreign_pre_chain=shared_processors,
+        )
+    )
+
     root = logging.getLogger()
     root.handlers.clear()
-    root.addHandler(handler)
+    root.addFilter(MuteDropper(settings.logging.muted_loggers))
+    root.addHandler(base_handler)
+    root.addHandler(otel_handler)

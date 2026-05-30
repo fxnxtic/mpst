@@ -12,6 +12,7 @@ from .resource import build_resource
 __all__ = (
     "configure_metrics",
     "get_meter",
+    "Metrics",
 )
 
 _meter_provider: MeterProvider | None = None
@@ -27,7 +28,7 @@ def configure_metrics(settings: Settings) -> None:
     if _meter_provider is not None:
         return
 
-    exporter = OTLPMetricExporter(endpoint=settings.otel.endpoint)
+    exporter = OTLPMetricExporter(endpoint=settings.otel.endpoint + "/v1/metrics")
 
     _meter_provider = MeterProvider(
         resource=build_resource(settings),
@@ -43,3 +44,7 @@ def configure_metrics(settings: Settings) -> None:
 
 
 USERS_COUNTER = get_meter().create_counter("users-counter")
+
+
+class Metrics:
+    users_counter = USERS_COUNTER

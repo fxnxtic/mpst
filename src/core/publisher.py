@@ -18,7 +18,7 @@ __all__ = (
     "MessagePublisher",
 )
 
-logger = get_logger(__name__)
+logger = get_logger("publisher")
 
 
 class DomainEvent(BaseModel):
@@ -167,7 +167,7 @@ class MessagePublisher:
                 subject=event.subject,
                 headers=headers,
             )
-            logger.info(
+            logger.debug(
                 "event published",
                 extra=dict(
                     event_type=type(event).__name__,

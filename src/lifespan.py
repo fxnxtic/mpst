@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from src.config import cfg
 from src.config.paths import ALEMBIC_DIR, ALEMBIC_INI_PATH
 from src.core.telemetry import get_logger
+from src.core.telemetry.instrumentation import instrument_faststream, instrument_sqlalchemy
 from src.database.migrations import run_migrations, setup_alembic
 
 logger = get_logger(__name__)
@@ -21,6 +22,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         app.state.broker = await app.state.container.get(NatsBroker)
         app.state.engine = await app.state.container.get(AsyncEngine)
         setup_faststream_dishka(app.state.container, broker=app.state.broker)
+
+        instrument_faststream(app.state.broker)
+        instrument_sqlalchemy(app.state.engine)
 
         logger.debug("Setup database...")
         _alembic_config = setup_alembic(ALEMBIC_INI_PATH, ALEMBIC_DIR)

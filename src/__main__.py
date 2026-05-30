@@ -8,11 +8,11 @@ from fastapi import FastAPI
 from src.api import router
 from src.config import cfg
 from src.core.telemetry import (
-    FastAPITraceMiddleware,
     get_logger,
     setup_telemetry,
     shutdown_telemetry,
 )
+from src.core.telemetry.instrumentation import instrument_fastapi
 from src.di import PROVIDERS, create_container
 from src.lifespan import lifespan
 
@@ -27,8 +27,10 @@ def run(name: str, host: str, port: int) -> None:
             title=name,
             lifespan=lifespan,
         )
+
+        instrument_fastapi(app, cfg)
+
         app.include_router(router)
-        app.add_middleware(FastAPITraceMiddleware)
 
         logger.debug("Setup DI container...")
         app.state.container = create_container(PROVIDERS)
